@@ -1,5 +1,5 @@
 {
-  "name": "mario21ic/dompdfmodule",
+  "name": "mikemix/dompdfmodule",
   "type": "library",
   "description": "DOMPDF Zend Framework lightweight module",
   "keywords": ["pdf","dompdf", "zf2", "zf3"],
