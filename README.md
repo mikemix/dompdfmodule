@@ -1,15 +1,16 @@
-dompdfmodule
+DompdfHelper
 ============
 
-DOMPDF library wrapper as lightweight ZF2/ZF3 module.
+DompdfHelper - a lightweight library wrapper Laminas module
 
-[![Build Status](https://travis-ci.org/mikemix/dompdfmodule.svg?branch=master)](https://travis-ci.org/mikemix/dompdfmodule)
+[![Build Status](https://travis-ci.org/rarog/dompdf-helper.svg?branch=master)](https://travis-ci.org/rarog/dompdf-helper)
+[![Coverage Status](https://coveralls.io/repos/github/rarog/dompdf-helper/badge.svg?branch=master)](https://coveralls.io/github/rarog/dompdf-helper?branch=master)
 
 ## Requirements
-  - [Zend Framework 2 or 3](https://framework.zend.com/)
+  - [Laminas](https://getlaminas.org/)
 
 ## Installation
-Installation of DOMPDFModule uses PHP Composer. For more information about
+Installation of DompdfHelper uses PHP Composer. For more information about
 PHP Composer, please visit the official [PHP Composer site](http://getcomposer.org/).
 
 #### Installation steps
@@ -20,40 +21,85 @@ PHP Composer, please visit the official [PHP Composer site](http://getcomposer.o
      ```json
      {
          "require": {
-             "mikemix/dompdfmodule": "^3.0"
+             "rarog/dompdf-helper": "^4.0"
          }
      }
      ```
   3. install PHP Composer via `curl -s http://getcomposer.org/installer | php` (on windows, download
      http://getcomposer.org/installer and execute it with PHP)
   4. run `php composer.phar install`
-  5. open `my/project/directory/config/application.config.php` and add the following key to your `modules`: 
+  5. open `my/project/directory/config/application.config.php` and add the following key to your `modules`:
 
      ```php
-     'dompdfmodule',
+     'DompdfHelper',
      ```
 
 #### Configuration options
-You can override default options via the `dompdf` key in your local or global config files. See the [dompdfmoule\Service\dompdfFactory.php](https://github.com/mikemix/dompdfmodule/blob/master/src/dompdfmodule/Service/dompdfFactory.php#L39) file for the list of default settings.
+You can override default options via the `dompdf` key in your local or global config files. See the [config/dompdf.config.php.dist](https://github.com/rarog/dompdf-helper/blob/master/config/dompdf.config.php.dist) file for the list of default settings.
 
-Full list of possible settings is available at the official [DOMPDF library](https://github.com/dompdf/dompdf) site.
+Full list of possible settings is available at the official [Dompdf library](https://github.com/dompdf/dompdf) site.
 
 #### Example usage
 
-> Side note: use of `getServiceLocator()` in the controller is deprecated since in ZF3. Make sure you create your controller via a factory and inject the Dompdf object in the constructor.
+Controller factory
 
 ```php
 <?php
 
-// some controller
+namespace My\Factory\Controller;
+
+use Interop\Container\ContainerInterface;
+use My\Controller\ExampleController;
+
+class ExampleControllerFactory implements FactoryInterface
+{
+    /**
+     * {@inheritDoc}
+     * @see \Laminas\ServiceManager\Factory\FactoryInterface::__invoke()
+     */
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        return new ExampleController(
+            $container->get('dompdf')
+        );
+    }
+}
+```
+
+Controller
+
+```php
+<?php
+
+namespace My\Controller;
+
+use Dompdf\Dompdf;
+use Laminas\Mvc\Controller\AbstractActionController;
+
+class ExampleController extends AbstractActionController
+{
+    /**
+     * @var Dompdf
+     */
+    private $dompdf;
+
+    /**
+     * Constructor
+     *
+     * @param Dompdf $dompdf
+     */
+    public function __construct(
+        Dompdf $dompdf
+    ) {
+        $this->dompdf = $dompdf;
+    }
 
     public function indexAction()
     {
-        /** @var \Dompdf\Dompdf $dompdf */
-        $dompdf = $this->getServiceLocator()->get('dompdf');
-        $dompdf->load_html('<strong>Ehlo World</strong>');
-        $dompdf->render();
+        $this->dompdf->load_html('<strong>Hello World</strong>');
+        $this->dompdf->render();
 
-        file_put_contents(__DIR__ . '/document.pdf', $dompdf->output());
+        file_put_contents(__DIR__ . '/document.pdf', $this->dompdf->output());
     }
+}
 ```

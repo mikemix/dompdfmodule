@@ -1,20 +1,20 @@
 language: php
 
 php:
-  - 5.5
-  - 5.6
-  - 7.0
-  - nightly
-  - hhvm
-
-matrix:
-  allow_failures:
-    - php: nightly
-    - php: hhvm
+  - 7.1
+  - 7.2
+  - 7.3
+  - 7.4
 
 before_script:
   - travis_retry composer self-update
   - travis_retry composer update ${COMPOSER_FLAGS} --no-interaction --prefer-source
 
 script:
-  - phpunit
+  - ./vendor/bin/phpunit
+  - ./vendor/bin/phpcs
+
+after_script:
+  - php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml
+  - php vendor/bin/php-coveralls
+  

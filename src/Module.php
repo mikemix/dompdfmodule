@@ -1,8 +1,16 @@
 <?php
-namespace dompdfmodule;
 
-class Module
+namespace DompdfHelper;
+
+use DompdfHelper\Factory\DompdfFactory;
+use Laminas\ModuleManager\Feature\ConfigProviderInterface;
+
+class Module implements ConfigProviderInterface
 {
+    /**
+     * {@inheritDoc}
+     * @see \Laminas\ModuleManager\Feature\ConfigProviderInterface::getConfig()
+     */
     public function getConfig()
     {
         return [
@@ -11,7 +19,7 @@ class Module
                     'dompdf' => false,
                 ],
                 'factories' => [
-                    'dompdf' => 'dompdfmodule\Factory\dompdfFactory',
+                    'dompdf' => DompdfFactory::class,
                 ],
             ],
         ];

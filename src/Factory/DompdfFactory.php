@@ -1,37 +1,33 @@
 <?php
-namespace dompdfmodule\Factory;
+
+namespace DompdfHelper\Factory;
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
-class dompdfFactory implements FactoryInterface
+class DompdfFactory implements FactoryInterface
 {
+    /**
+     * {@inheritDoc}
+     * @see \Laminas\ServiceManager\Factory\FactoryInterface::__invoke()
+     */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         return $this->createFromConfig($container->get('config'));
     }
 
-    public function createService(ServiceLocatorInterface $serviceLocator)
-    {
-        return $this->createFromConfig($serviceLocator->get('config'));
-    }
-
+    /**
+     * @param array $config Configuration
+     * @return Dompdf Dompdf instance
+     */
     protected function createFromConfig(array $config)
     {
         $userConfig = isset($config['dompdf']) ? $config['dompdf'] : [];
 
-        // evaluate library directory
-        $dompdfDir = isset($userConfig['DOMPDF_DIR']) ?
-            $userConfig['DOMPDF_DIR'] :
-            realpath('vendor/dompdf/dompdf');
-
-        // merge default config with user config if necessary
-        $dompdfConfig = count($userConfig) ?
-            array_merge($this->createDefaultSettings($dompdfDir), $userConfig) :
-            $this->createDefaultSettings($dompdfDir);
+        // merge default config with user config
+        $dompdfConfig = array_merge($this->createDefaultSettings(), $userConfig);
 
         // set options
         $options = new Options();
@@ -46,12 +42,11 @@ class dompdfFactory implements FactoryInterface
 
     /**
      * Some settings can be evaluated by default.
-     * @param string $dompdfDir DOMPDF library directory
      * @return array Default settings
      */
-    protected function createDefaultSettings($dompdfDir)
+    protected function createDefaultSettings(): array
     {
-        return array(
+        return [
             'logOutputFile'           => false,
             'defaultMediaType'        => 'screen',
             'defaultPaperSize'        => 'A4',
@@ -73,6 +68,6 @@ class dompdfFactory implements FactoryInterface
             'debugLayoutBlocks'     => false,
             'debugLayoutInline'     => false,
             'debugLayoutPaddingBox' => false,
-        );
+        ];
     }
 }
